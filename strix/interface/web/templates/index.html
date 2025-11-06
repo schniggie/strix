@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strix Web Interface - Cybersecurity Agent</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+                <h1>🦉 Strix Cybersecurity Agent</h1>
+            </div>
+            <p class="subtitle">Self-service penetration testing for developers</p>
+        </header>
+
+        <main class="main-content">
+            <div class="scan-form-section">
+                <h2><i class="fas fa-crosshairs"></i> Start New Penetration Test</h2>
+                
+                <form id="scanForm" class="scan-form">
+                    <div class="form-group">
+                        <label for="targetUrl">
+                            <i class="fas fa-globe"></i> Target URL *
+                        </label>
+                        <input type="url" id="targetUrl" name="targetUrl" required 
+                               placeholder="https://example.com"
+                               title="Enter the URL of the application you want to test">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="repoUrl">
+                            <i class="fab fa-github"></i> Repository URL (optional)
+                        </label>
+                        <input type="url" id="repoUrl" name="repoUrl" 
+                               placeholder="https://github.com/user/repo"
+                               title="Optional: Repository URL for white-box testing">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="instructions">
+                            <i class="fas fa-bullseye"></i> Focused Test Instructions (optional)
+                        </label>
+                        <textarea id="instructions" name="instructions" rows="4" 
+                                  placeholder="Examples:&#10;• Focus on authentication and authorization vulnerabilities&#10;• Test with credentials: admin:password123&#10;• Prioritize API endpoint security&#10;• Check for OWASP Top 10 vulnerabilities"
+                                  title="Provide specific instructions to guide the penetration test"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary" id="startScanBtn">
+                        <i class="fas fa-play"></i> Start Penetration Test
+                    </button>
+                </form>
+            </div>
+
+            <div id="scanProgress" class="scan-progress" style="display: none;">
+                <h3><i class="fas fa-cog fa-spin"></i> Scan Progress</h3>
+                <div id="scanStatus" class="status-container"></div>
+                <div id="progressBar" class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+
+            <div id="vulnerabilitiesSection" class="vulnerabilities-section" style="display: none;">
+                <h3><i class="fas fa-bug"></i> Vulnerabilities Found</h3>
+                <div id="vulnerabilitiesCount" class="vuln-count">0 vulnerabilities found</div>
+                <div id="vulnerabilities" class="vulnerabilities-container"></div>
+            </div>
+
+            <div id="finalReportSection" class="final-report-section" style="display: none;">
+                <h3><i class="fas fa-file-alt"></i> Final Report</h3>
+                <div id="finalReport" class="final-report"></div>
+                <button id="downloadReportBtn" class="btn-secondary">
+                    <i class="fas fa-download"></i> Download Report
+                </button>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <p>&copy; 2024 Strix Cybersecurity Agent. Open-source AI hackers for your apps.</p>
+                <div class="footer-links">
+                    <a href="/api/docs" target="_blank"><i class="fas fa-book"></i> API Docs</a>
+                    <a href="https://github.com/usestrix/strix" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <i class="fas fa-shield-alt fa-spin"></i>
+            <p>Initializing penetration test...</p>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

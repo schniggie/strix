@@ -1,0 +1,38 @@
+# Dockerfile for Strix Web Interface
+FROM python:3.12-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Docker CLI (for Strix agent execution)
+RUN curl -fsSL https://get.docker.com | sh
+
+# Copy requirements and install Python dependencies
+COPY pyproject.toml poetry.lock* ./
+RUN pip install poetry && \
+    poetry config virtualenvs.create false && \
+    poetry install --only=main
+
+# Copy application code
+COPY . .
+
+# Create non-root user for security
+RUN useradd -m -u 1000 strix && \
+    chown -R strix:strix /app
+USER strix
+
+# Expose port
+EXPOSE 12000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:12000/health || exit 1
+
+# Default command
+CMD ["python", "-m", "strix.interface.web.server", "--host", "0.0.0.0", "--port", "12000"]
