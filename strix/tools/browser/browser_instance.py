@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import logging
+import os
 import threading
 from pathlib import Path
 from typing import Any, cast
@@ -80,16 +81,61 @@ class BrowserInstance:
     async def _launch_browser(self, url: str | None = None) -> dict[str, Any]:
         self.playwright = await async_playwright().start()
 
-        self.browser = await self.playwright.chromium.launch(
-            headless=True,
-            args=[
-                "--no-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-gpu",
-                "--disable-web-security",
-                "--disable-features=VizDisplayCompositor",
-            ],
-        )
+        # Check for browserless configuration
+        browserless_base = os.getenv("STRIX_BROWSERLESS_BASE")
+        browser_type = os.getenv("STRIX_BROWSERLESS_TYPE", "chromium").lower()
+
+        if browserless_base:
+            # Connect to browserless instance
+            logger.info(f"Connecting to browserless instance at {browserless_base}")
+            logger.debug(f"Using browser type: {browser_type}")
+
+            try:
+                # Construct WebSocket URL for browserless
+                browserless_ws = f"{browserless_base.rstrip('/')}/{browser_type}/playwright"
+                logger.debug(f"Connecting to WebSocket: {browserless_ws}")
+
+                # Connect using appropriate browser type
+                if browser_type == "firefox":
+                    self.browser = await self.playwright.firefox.connect(browserless_ws)
+                    logger.info("Successfully connected to browserless Firefox")
+                elif browser_type == "chromium":
+                    self.browser = await self.playwright.chromium.connect(browserless_ws)
+                    logger.info("Successfully connected to browserless Chromium")
+                else:
+                    logger.warning(
+                        f"Unknown browser type '{browser_type}', defaulting to chromium"
+                    )
+                    self.browser = await self.playwright.chromium.connect(browserless_ws)
+                    logger.info("Successfully connected to browserless Chromium (default)")
+
+            except Exception as e:
+                logger.error(f"Failed to connect to browserless instance: {e}")
+                logger.info("Falling back to local browser launch")
+                # Fallback to local browser if connection fails
+                self.browser = await self.playwright.chromium.launch(
+                    headless=True,
+                    args=[
+                        "--no-sandbox",
+                        "--disable-dev-shm-usage",
+                        "--disable-gpu",
+                        "--disable-web-security",
+                        "--disable-features=VizDisplayCompositor",
+                    ],
+                )
+        else:
+            # Original local launch logic
+            logger.info("Launching local browser (no browserless configuration detected)")
+            self.browser = await self.playwright.chromium.launch(
+                headless=True,
+                args=[
+                    "--no-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--disable-gpu",
+                    "--disable-web-security",
+                    "--disable-features=VizDisplayCompositor",
+                ],
+            )
 
         self.context = await self.browser.new_context(
             viewport={"width": 1280, "height": 720},

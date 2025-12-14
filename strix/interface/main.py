@@ -65,6 +65,12 @@ def validate_environment() -> None:  # noqa: PLR0912, PLR0915
     if not os.getenv("PERPLEXITY_API_KEY"):
         missing_optional_vars.append("PERPLEXITY_API_KEY")
 
+    if not os.getenv("STRIX_BROWSERLESS_BASE"):
+        missing_optional_vars.append("STRIX_BROWSERLESS_BASE")
+
+    if not os.getenv("STRIX_BROWSERLESS_TYPE"):
+        missing_optional_vars.append("STRIX_BROWSERLESS_TYPE")
+
     if missing_required_vars:
         error_text = Text()
         error_text.append("❌ ", style="bold red")
@@ -114,6 +120,20 @@ def validate_environment() -> None:  # noqa: PLR0912, PLR0915
                     error_text.append("PERPLEXITY_API_KEY", style="bold cyan")
                     error_text.append(
                         " - API key for Perplexity AI web search (enables real-time research)\n",
+                        style="white",
+                    )
+                elif var == "STRIX_BROWSERLESS_BASE":
+                    error_text.append("• ", style="white")
+                    error_text.append("STRIX_BROWSERLESS_BASE", style="bold cyan")
+                    error_text.append(
+                        " - WebSocket URL for browserless instance (e.g., 'ws://localhost:3000')\n",
+                        style="white",
+                    )
+                elif var == "STRIX_BROWSERLESS_TYPE":
+                    error_text.append("• ", style="white")
+                    error_text.append("STRIX_BROWSERLESS_TYPE", style="bold cyan")
+                    error_text.append(
+                        " - Browser type for browserless: 'chromium' or 'firefox' (default: 'chromium')\n",
                         style="white",
                     )
 
