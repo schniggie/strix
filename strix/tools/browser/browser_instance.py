@@ -92,14 +92,15 @@ class BrowserInstance:
 
             try:
                 # Construct WebSocket URL for browserless
-                # Check if there are existing query parameters or auth token
+                # When using connect_over_cdp, we connect directly to the base URL
+                # and append the token as a query parameter
                 browserless_token = os.getenv("STRIX_BROWSERLESS_TOKEN")
                 
                 # Parse the base URL to handle query parameters correctly
                 base_url = browserless_base.rstrip('/')
                 
-                # Add the browser type and playwright endpoint
-                browserless_ws = f"{base_url}/{browser_type}/playwright"
+                # For connect_over_cdp, use the base URL directly (not /chromium/playwright path)
+                browserless_ws = base_url
                 
                 # Add authentication token if provided
                 if browserless_token:
@@ -111,17 +112,19 @@ class BrowserInstance:
                 logger.debug(f"Connecting to WebSocket: {browserless_ws}")
 
                 # Connect using appropriate browser type
+                # Note: For browserless, we use connect_over_cdp instead of connect
+                # This allows query parameters (like token) to be properly passed
                 if browser_type == "firefox":
-                    self.browser = await self.playwright.firefox.connect(browserless_ws)
+                    self.browser = await self.playwright.firefox.connect_over_cdp(browserless_ws)
                     logger.info("Successfully connected to browserless Firefox")
                 elif browser_type == "chromium":
-                    self.browser = await self.playwright.chromium.connect(browserless_ws)
+                    self.browser = await self.playwright.chromium.connect_over_cdp(browserless_ws)
                     logger.info("Successfully connected to browserless Chromium")
                 else:
                     logger.warning(
                         f"Unknown browser type '{browser_type}', defaulting to chromium"
                     )
-                    self.browser = await self.playwright.chromium.connect(browserless_ws)
+                    self.browser = await self.playwright.chromium.connect_over_cdp(browserless_ws)
                     logger.info("Successfully connected to browserless Chromium (default)")
 
             except Exception as e:
