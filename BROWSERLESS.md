@@ -123,8 +123,9 @@ export STRIX_BROWSERLESS_BASE=ws://browserless:3000
 # Remote browserless instance
 export STRIX_BROWSERLESS_BASE=ws://browserless.example.com:3000
 
-# With authentication token
-export STRIX_BROWSERLESS_BASE=ws://localhost:3000?token=your-token-here
+# With authentication token (recommended method)
+export STRIX_BROWSERLESS_BASE=wss://browserless.example.com
+export STRIX_BROWSERLESS_TOKEN=your-browserless-token-here
 ```
 
 **Note**: If not set, Strix will automatically fall back to local browser launch.
@@ -142,6 +143,19 @@ export STRIX_BROWSERLESS_TYPE=firefox
 ```
 
 **Default**: `chromium`
+
+#### `STRIX_BROWSERLESS_TOKEN`
+
+**Optional**: Authentication token for secured browserless instances
+
+```bash
+# For instances requiring authentication
+export STRIX_BROWSERLESS_TOKEN=your-browserless-token-here
+
+# Leave unset for instances without authentication
+```
+
+**Default**: None (no authentication)
 
 ### Verification
 
@@ -276,11 +290,41 @@ Connect to a centralized browserless service:
 
 ```bash
 # Configure Strix to use remote browserless
-export STRIX_BROWSERLESS_BASE=ws://browserless.company.internal:3000
+export STRIX_BROWSERLESS_BASE=wss://browserless.company.internal
 export STRIX_BROWSERLESS_TYPE=chromium
 
 # If authentication is required
-export STRIX_BROWSERLESS_BASE=ws://browserless.company.internal:3000?token=${BROWSERLESS_TOKEN}
+export STRIX_BROWSERLESS_TOKEN=${BROWSERLESS_TOKEN}
+# Configure Strix to use remote browserless
+export STRIX_BROWSERLESS_BASE=wss://browserless.company.internal
+export STRIX_BROWSERLESS_TYPE=chromium
+
+# If authentication is required
+export STRIX_BROWSERLESS_TOKEN=${BROWSERLESS_TOKEN}
+# Configure Strix to use remote browserless
+export STRIX_BROWSERLESS_BASE=wss://browserless.company.internal
+export STRIX_BROWSERLESS_TYPE=chromium
+
+# If authentication is required
+export STRIX_BROWSERLESS_TOKEN=${BROWSERLESS_TOKEN}
+# Configure Strix to use remote browserless
+export STRIX_BROWSERLESS_BASE=wss://browserless.company.internal
+export STRIX_BROWSERLESS_TYPE=chromium
+
+# If authentication is required
+export STRIX_BROWSERLESS_TOKEN=${BROWSERLESS_TOKEN}
+# Configure Strix to use remote browserless
+export STRIX_BROWSERLESS_BASE=wss://browserless.company.internal
+export STRIX_BROWSERLESS_TYPE=chromium
+
+# If authentication is required
+export STRIX_BROWSERLESS_TOKEN=${BROWSERLESS_TOKEN}
+# Configure Strix to use remote browserless
+export STRIX_BROWSERLESS_BASE=wss://browserless.company.internal
+export STRIX_BROWSERLESS_TYPE=chromium
+
+# If authentication is required
+export STRIX_BROWSERLESS_TOKEN=${BROWSERLESS_TOKEN}
 ```
 
 ## Testing
@@ -606,4 +650,3 @@ For issues related to:
 ---
 
 **Last Updated**: December 2024
-

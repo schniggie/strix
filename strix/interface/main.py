@@ -71,6 +71,9 @@ def validate_environment() -> None:  # noqa: PLR0912, PLR0915
     if not os.getenv("STRIX_BROWSERLESS_TYPE"):
         missing_optional_vars.append("STRIX_BROWSERLESS_TYPE")
 
+    if not os.getenv("STRIX_BROWSERLESS_TOKEN"):
+        missing_optional_vars.append("STRIX_BROWSERLESS_TOKEN")
+
     if missing_required_vars:
         error_text = Text()
         error_text.append("❌ ", style="bold red")
@@ -134,6 +137,13 @@ def validate_environment() -> None:  # noqa: PLR0912, PLR0915
                     error_text.append("STRIX_BROWSERLESS_TYPE", style="bold cyan")
                     error_text.append(
                         " - Browser type for browserless: 'chromium' or 'firefox' (default: 'chromium')\n",
+                        style="white",
+                    )
+                elif var == "STRIX_BROWSERLESS_TOKEN":
+                    error_text.append("• ", style="white")
+                    error_text.append("STRIX_BROWSERLESS_TOKEN", style="bold cyan")
+                    error_text.append(
+                        " - Authentication token for browserless instance (if required)\n",
                         style="white",
                     )
 

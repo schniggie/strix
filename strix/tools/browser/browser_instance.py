@@ -92,7 +92,22 @@ class BrowserInstance:
 
             try:
                 # Construct WebSocket URL for browserless
-                browserless_ws = f"{browserless_base.rstrip('/')}/{browser_type}/playwright"
+                # Check if there are existing query parameters or auth token
+                browserless_token = os.getenv("STRIX_BROWSERLESS_TOKEN")
+                
+                # Parse the base URL to handle query parameters correctly
+                base_url = browserless_base.rstrip('/')
+                
+                # Add the browser type and playwright endpoint
+                browserless_ws = f"{base_url}/{browser_type}/playwright"
+                
+                # Add authentication token if provided
+                if browserless_token:
+                    # Check if URL already has query parameters
+                    separator = "&" if "?" in browserless_ws else "?"
+                    browserless_ws = f"{browserless_ws}{separator}token={browserless_token}"
+                    logger.debug("Authentication token added to WebSocket URL")
+                
                 logger.debug(f"Connecting to WebSocket: {browserless_ws}")
 
                 # Connect using appropriate browser type
