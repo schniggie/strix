@@ -129,7 +129,11 @@ def test_navigation() -> bool:
         print_info(f"Navigating to {test_url}")
         result = browser.goto(test_url)
         
-        if result.get("url") == test_url:
+        # Normalize URLs for comparison (browsers add trailing slash)
+        actual_url = result.get("url", "").rstrip("/")
+        expected_url = test_url.rstrip("/")
+        
+        if actual_url == expected_url:
             print_success(f"Navigation successful: {result.get('url')}")
         else:
             print_error(f"Navigation failed. Expected {test_url}, got {result.get('url')}")
