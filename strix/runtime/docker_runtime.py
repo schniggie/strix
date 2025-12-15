@@ -239,9 +239,19 @@ class DockerRuntime(AbstractRuntime):
         )
         caido_token = result.output.decode().strip() if result.exit_code == 0 else ""
 
+        # Collect browserless environment variables to pass to sandbox
+        browserless_env = ""
+        if os.getenv("STRIX_BROWSERLESS_BASE"):
+            browserless_env += f"STRIX_BROWSERLESS_BASE={os.getenv('STRIX_BROWSERLESS_BASE')} "
+        if os.getenv("STRIX_BROWSERLESS_TYPE"):
+            browserless_env += f"STRIX_BROWSERLESS_TYPE={os.getenv('STRIX_BROWSERLESS_TYPE')} "
+        if os.getenv("STRIX_BROWSERLESS_TOKEN"):
+            browserless_env += f"STRIX_BROWSERLESS_TOKEN={os.getenv('STRIX_BROWSERLESS_TOKEN')} "
+        
         container.exec_run(
             f"bash -c 'source /etc/profile.d/proxy.sh && cd /app && "
             f"STRIX_SANDBOX_MODE=true CAIDO_API_TOKEN={caido_token} CAIDO_PORT={caido_port} "
+            f"{browserless_env}"
             f"poetry run python strix/runtime/tool_server.py --token {tool_server_token} "
             f"--host 0.0.0.0 --port {tool_server_port} &'",
             detach=True,
