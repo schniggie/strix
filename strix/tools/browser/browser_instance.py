@@ -84,6 +84,11 @@ class BrowserInstance:
         # Check for browserless configuration
         browserless_base = os.getenv("STRIX_BROWSERLESS_BASE")
         browser_type = os.getenv("STRIX_BROWSERLESS_TYPE", "chromium").lower()
+        
+        # Enhanced logging for debugging
+        logger.info(f"Browser launch requested. Checking for browserless configuration...")
+        logger.debug(f"STRIX_BROWSERLESS_BASE: {browserless_base or 'Not set'}")
+        logger.debug(f"STRIX_BROWSERLESS_TYPE: {browser_type}")
 
         if browserless_base:
             # Connect to browserless instance
