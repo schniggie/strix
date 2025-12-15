@@ -6,9 +6,15 @@ This script validates that the browserless integration works correctly.
 It can be run manually to verify functionality without running the full test suite.
 
 Usage:
-    # Test with browserless
+    # Test with browserless (no authentication)
     export STRIX_BROWSERLESS_BASE=ws://localhost:3000
     export STRIX_BROWSERLESS_TYPE=chromium
+    python tests/integration/test_browserless_integration.py
+
+    # Test with authenticated browserless
+    export STRIX_BROWSERLESS_BASE=wss://browserless.example.com
+    export STRIX_BROWSERLESS_TYPE=chromium
+    export STRIX_BROWSERLESS_TOKEN=your-token-here
     python tests/integration/test_browserless_integration.py
 
     # Test with local browser (no env vars)
@@ -55,11 +61,20 @@ def check_environment() -> dict[str, str | None]:
     config = {
         "browserless_base": os.getenv("STRIX_BROWSERLESS_BASE"),
         "browserless_type": os.getenv("STRIX_BROWSERLESS_TYPE", "chromium"),
+        "browserless_token": os.getenv("STRIX_BROWSERLESS_TOKEN"),
     }
     
     if config["browserless_base"]:
         print_info(f"Browserless Base: {config['browserless_base']}")
         print_info(f"Browser Type: {config['browserless_type']}")
+        
+        # Show token status (without revealing the actual token)
+        if config["browserless_token"]:
+            token_preview = config["browserless_token"][:4] + "..." if len(config["browserless_token"]) > 4 else "***"
+            print_info(f"Authentication Token: {token_preview} (set)")
+        else:
+            print_info("Authentication Token: Not set")
+        
         print_info("Mode: Remote browserless connection")
     else:
         print_info("Browserless Base: Not set")
@@ -250,4 +265,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-
