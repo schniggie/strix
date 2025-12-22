@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  browserless:
+    image: browserless/chrome:latest
+    container_name: strix-browserless
+    ports:
+      - "3000:3000"
+    environment:
+      # Connection timeout in milliseconds
+      - CONNECTION_TIMEOUT=60000
+      # Maximum concurrent sessions
+      - MAX_CONCURRENT_SESSIONS=10
+      # Enable debugging
+      - DEBUG=browserless*
+      # Disable token authentication for local testing
+      - TOKEN=
+    volumes:
+      # Persist downloads
+      - browserless-downloads:/workspace
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/pressure"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  strix:
+    build:
+      context: .
+      dockerfile: containers/Dockerfile
+    container_name: strix-test
+    environment:
+      # Browserless configuration
+      - STRIX_BROWSERLESS_BASE=ws://browserless:3000
+      - STRIX_BROWSERLESS_TYPE=chromium
+      
+      # LLM configuration (update with your values)
+      - STRIX_LLM=${STRIX_LLM:-openai/gpt-4}
+      - LLM_API_KEY=${LLM_API_KEY}
+      - LLM_API_BASE=${LLM_API_BASE:-}
+      - OPENAI_API_BASE=${OPENAI_API_BASE:-}
+      - LITELLM_BASE_URL=${LITELLM_BASE_URL:-}
+      - OLLAMA_API_BASE=${OLLAMA_API_BASE:-}
+      
+      # Optional Perplexity for web search
+      - PERPLEXITY_API_KEY=${PERPLEXITY_API_KEY:-}
+      
+      # Strix configuration
+      - STRIX_SANDBOX_MODE=true
+      - PYTHONPATH=/app
+    volumes:
+      - ./workspace:/workspace
+      - ./strix:/app/strix
+    depends_on:
+      browserless:
+        condition: service_healthy
+    command: /bin/bash
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+volumes:
+  browserless-downloads:
+    driver: local
+

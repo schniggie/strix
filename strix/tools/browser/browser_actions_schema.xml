@@ -3,7 +3,15 @@
   <tool name="browser_action">
     <description>Perform browser actions using a Playwright-controlled browser with multiple tabs.
   The browser is PERSISTENT and remains active until explicitly closed, allowing for
-  multi-step workflows and long-running processes across multiple tabs.</description>
+  multi-step workflows and long-running processes across multiple tabs.
+  
+  BROWSERLESS INTEGRATION: Strix can connect to self-hosted browserless instances for
+  improved performance, scalability, and resource management. Configure via environment
+  variables:
+    - STRIX_BROWSERLESS_BASE: WebSocket URL (e.g., 'ws://localhost:3000')
+    - STRIX_BROWSERLESS_TYPE: Browser type - 'chromium' or 'firefox' (default: 'chromium')
+  
+  If browserless is not configured, Strix automatically falls back to local browser launch.</description>
     <parameters>
       <parameter name="action" type="string" required="true">
       </parameter>
