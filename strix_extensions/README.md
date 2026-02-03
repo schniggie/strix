@@ -40,10 +40,10 @@ Once Strix is running with the extension, agents have access to new tools:
 
 # The agent can use:
 result = login_sso(
-    url="https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com",
-    username="PID9A15",
-    password="your_password",
-    totp_secret="GVSU KSKO ZYJO KF5T G2GT TBIK OMUN JGVD"
+    url="https://example.com",
+    username="YOUR_USERNAME",
+    password="YOUR_PASSWORD",
+    totp_secret="YOUR_TOTP_SECRET"
 )
 
 if result["status"] == "success":
@@ -78,9 +78,9 @@ High-level SSO authentication tool. Returns cookies ready for browser injection.
 ```python
 result = login_sso(
     url="https://app.example.com",
-    username="PID9A15",
+    username="YOUR_USERNAME",
     password="secret",
-    totp_secret="GVSU KSKO..."
+    totp_secret="YOUR_TOTP_SECRET"
 )
 # Returns: {"status": "success", "cookies": [...], "final_url": "...", "login_done": True}
 ```
@@ -146,9 +146,9 @@ browser_action(action="launch")
 # 2. Authenticate via SSO
 sso_result = login_sso(
     url="https://appinspector.example.com",
-    username="PID9A15",
+    username="YOUR_USERNAME",
     password="secret",
-    totp_secret="GVSU KSKO ZYJO KF5T G2GT TBIK OMUN JGVD"
+    totp_secret="YOUR_TOTP_SECRET"
 )
 
 # 3. Check authentication status
@@ -207,22 +207,6 @@ pytest strix_extensions/tests/test_sso_integration.py -v
 pytest strix_extensions/tests/test_sso_integration.py --cov=strix_extensions
 ```
 
-### E2E Testing with Docker Compose
-
-```bash
-# Build and run test stack
-docker-compose -f docker-compose.sso-test.yml up --build
-
-# Run specific service
-docker-compose -f docker-compose.sso-test.yml run strix-sso
-
-# Clean up
-docker-compose -f docker-compose.sso-test.yml down
-```
-
-The Docker Compose setup includes:
-- **mock-sso-server**: Mock SSO server for testing
-- **protected-app**: Mock protected application
 - **strix-sso**: Strix instance with SSO extension
 
 ## 🏗️ Architecture
@@ -259,6 +243,17 @@ The Docker Compose setup includes:
 - **Wrapper Script Pattern**: Extensions load via import before Strix initialization
 - **Playwright Native APIs**: Uses Playwright's built-in cookie management
 - **SSE Transport**: MCP client uses HTTP/SSE for simplicity (no stdio complexity)
+
+### ⚠️ **Important Compatibility Note**
+
+This extension accesses some private Strix APIs (`manager._get_agent_browser()` and `browser._loop`) for browser integration. While this works with the current version of Strix, these private APIs may change in future releases.
+
+**Recommendations**:
+- Test after each Strix upgrade
+- Consider contributing cookie management to upstream Strix for a more stable public API
+- Monitor Strix release notes for browser API changes
+
+If Strix changes these internal APIs, the extension may need updates. Opening an issue with Strix maintainers to request public browser cookie APIs would make this extension more maintainable long-term.
 
 ## 📚 Documentation
 
@@ -394,4 +389,3 @@ For issues specific to this extension:
 For Strix core issues:
 - [Strix GitHub Issues](https://github.com/usestrix/strix/issues)
 - [Strix Documentation](https://docs.usestrix.com)
-

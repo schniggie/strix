@@ -44,7 +44,7 @@ That's it! Strix now has SSO capabilities.
 ### Test with Example Task
 
 ```bash
-python run_strix_with_sso.py --task "Authenticate to https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com using SSO"
+python run_strix_with_sso.py --task "Authenticate to https://example.com using SSO"
 ```
 
 ### Example Agent Workflow
@@ -54,17 +54,17 @@ The agent can now use these tools:
 ```python
 # 1. Authenticate
 result = login_sso(
-    url="https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com",
-    username="PID9A15",
-    password="your_password",
-    totp_secret="GVSU KSKO ZYJO KF5T G2GT TBIK OMUN JGVD"
+    url="https://example.com",
+    username="YOUR_USERNAME",
+    password="YOUR_PASSWORD",
+    totp_secret="YOUR_TOTP_SECRET"
 )
 
 # 2. Inject cookies
 set_cookies(result["cookies"])
 
 # 3. Access protected app
-browser_action(action="goto", url="https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com")
+browser_action(action="goto", url="https://example.com")
 ```
 
 ## What's Available?
@@ -118,11 +118,6 @@ python run_strix_with_sso.py
 pytest strix_extensions/tests/test_sso_integration.py -v
 ```
 
-### E2E Tests (Docker)
-
-```bash
-docker-compose -f docker-compose.sso-test.yml up --build
-```
 
 ## Troubleshooting
 

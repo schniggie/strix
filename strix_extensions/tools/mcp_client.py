@@ -6,6 +6,7 @@ enabling integration with external authentication and other services.
 
 import json
 import logging
+import os
 from typing import Any
 
 import httpx
@@ -13,9 +14,9 @@ from strix.tools.registry import register_tool
 
 logger = logging.getLogger(__name__)
 
-# MCP server configuration
-MCP_SERVER_URL = "https://sso.mcp.offsec.corpintra.net/mcp"
-MCP_TIMEOUT = 30.0  # seconds
+# MCP server configuration (configurable via environment variables)
+MCP_SERVER_URL = os.environ.get("MCP_SERVER_URL", "https://sso.mcp.offsec.corpintra.net/mcp")
+MCP_TIMEOUT = float(os.environ.get("MCP_TIMEOUT", "30.0"))
 
 
 def _parse_mcp_response(response_data: dict[str, Any]) -> dict[str, Any]:
@@ -117,7 +118,7 @@ def call_mcp_tool(
                 "url": "https://app.example.com",
                 "username": "user@example.com",
                 "password": "secret",
-                "totp_secret": "GVSU KSKO..."
+                "totp_secret": "YOUR_TOTP_SECRET"
             }
         )
     """
@@ -216,9 +217,9 @@ def login_sso(
     
     Args:
         url: Target application URL to authenticate to
-        username: SSO username (e.g., "PID9A15")
+        username: SSO username (e.g., "YOUR_USERNAME")
         password: SSO password
-        totp_secret: Optional TOTP secret for 2FA (e.g., "GVSU KSKO...")
+        totp_secret: Optional TOTP secret for 2FA (e.g., "YOUR_TOTP_SECRET")
         totp_secret_int: Optional TOTP secret (alternate format)
         
     Returns:
@@ -232,9 +233,9 @@ def login_sso(
     Example:
         result = login_sso(
             url="https://appinspector.example.com",
-            username="PID9A15",
+            username="YOUR_USERNAME",
             password="secret",
-            totp_secret="GVSU KSKO ZYJO KF5T..."
+            totp_secret="YOUR_TOTP_SECRET"
         )
         
         if result["status"] == "success":
@@ -320,4 +321,3 @@ def login_sso(
             "message": f"Failed to complete SSO login: {str(e)}",
             "cookies": []
         }
-

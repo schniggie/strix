@@ -11,10 +11,10 @@ This document provides practical examples of using the Strix SSO extension for c
 
 # Step 1: Authenticate via SSO
 result = login_sso(
-    url="https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com",
-    username="PID9A15",
-    password="4jgvYT2yMKsbkWGhtrLCkrAW9g4",
-    totp_secret="GVSU KSKO ZYJO KF5T G2GT TBIK OMUN JGVD"
+    url="https://example.com",
+    username="YOUR_USERNAME",
+    password="YOUR_PASSWORD",
+    totp_secret="YOUR_TOTP_SECRET"
 )
 
 # Step 2: Check authentication
@@ -32,7 +32,7 @@ set_cookies(result["cookies"])
 # Step 4: Navigate to application
 browser_action(
     action="goto",
-    url="https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com"
+    url="https://example.com"
 )
 
 # Step 5: Take screenshot
@@ -56,10 +56,10 @@ browser_action(action="save_pdf", file_path="appinspector_dashboard.pdf")
 
 # Authenticate (same as Example 1)
 result = login_sso(
-    url="https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com",
-    username="PID9A15",
-    password="your_password",
-    totp_secret="your_totp_secret"
+    url="https://example.com",
+    username="YOUR_USERNAME",
+    password="YOUR_PASSWORD",
+    totp_secret="YOUR_TOTP_SECRET"
 )
 
 set_cookies(result["cookies"])
@@ -75,7 +75,7 @@ pages = [
 for page in pages:
     browser_action(
         action="goto",
-        url=f"https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com{page}"
+        url=f"https://example.com{page}"
     )
     browser_action(action="wait", duration=2)
     print(f"✓ Visited {page}")
@@ -97,9 +97,9 @@ for page in pages:
 
 # Authenticate
 result = login_sso(
-    url="https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com",
-    username="PID9A15",
-    password="your_password"
+    url="https://example.com",
+    username="YOUR_USERNAME",
+    password="YOUR_PASSWORD"
 )
 
 # Inject cookies
@@ -114,7 +114,7 @@ for cookie in browser_cookies["cookies"]:
 # Navigate and verify access
 browser_action(
     action="goto",
-    url="https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com/dashboard"
+    url="https://example.com/dashboard"
 )
 
 # Check page title to confirm we're authenticated
@@ -143,7 +143,7 @@ def check_authentication_required(page_url):
 # Try accessing protected page
 browser_action(
     action="goto",
-    url="https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com/dashboard"
+    url="https://example.com/dashboard"
 )
 
 if check_authentication_required("dashboard"):
@@ -154,10 +154,10 @@ if check_authentication_required("dashboard"):
     
     # Re-authenticate
     result = login_sso(
-        url="https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com",
-        username="PID9A15",
-        password="your_password",
-        totp_secret="your_totp_secret"
+        url="https://example.com",
+        username="YOUR_USERNAME",
+        password="YOUR_PASSWORD",
+        totp_secret="YOUR_TOTP_SECRET"
     )
     
     # Inject new cookies
@@ -166,7 +166,7 @@ if check_authentication_required("dashboard"):
     # Retry access
     browser_action(
         action="goto",
-        url="https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com/dashboard"
+        url="https://example.com/dashboard"
     )
     
     print("✓ Re-authentication successful")
@@ -191,17 +191,17 @@ else:
 
 # Authenticate once
 result = login_sso(
-    url="https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com",
-    username="PID9A15",
-    password="your_password",
-    totp_secret="your_totp_secret"
+    url="https://example.com",
+    username="YOUR_USERNAME",
+    password="YOUR_PASSWORD",
+    totp_secret="YOUR_TOTP_SECRET"
 )
 
 set_cookies(result["cookies"])
 
 # Access multiple applications with same SSO
 apps = [
-    "https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com",
+    "https://example.com",
     "https://testportal-nonprod.offsec.mercedes-benz-techinnovation.com",
     "https://dashboard-nonprod.offsec.mercedes-benz-techinnovation.com"
 ]
@@ -230,8 +230,8 @@ for app_url in apps:
 result = call_mcp_tool(
     tool_name="login_sso",
     arguments={
-        "url": "https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com",
-        "username": "PID9A15",
+        "url": "https://example.com",
+        "username": "YOUR_USERNAME",
         "password": "your_password",
         "totp_secret": "your_totp_secret"
     }
@@ -302,7 +302,7 @@ def safe_login(url, username, password, totp_secret=None):
 
 # Try authentication
 result = safe_login(
-    url="https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com",
+    url="https://example.com",
     username="INVALID_USER",
     password="WRONG_PASSWORD"
 )
@@ -330,22 +330,17 @@ else:
 # Terminal commands
 
 # 1. Build test environment
-docker-compose -f docker-compose.sso-test.yml build
 
 # 2. Start services
-docker-compose -f docker-compose.sso-test.yml up -d mock-sso-server protected-app
 
 # 3. Wait for services to be ready
 sleep 5
 
 # 4. Run Strix with test task
-docker-compose -f docker-compose.sso-test.yml run strix-sso python run_strix_with_sso.py --task "Authenticate to mock SSO and access protected app"
 
 # 5. Check logs
-docker-compose -f docker-compose.sso-test.yml logs strix-sso
 
 # 6. Clean up
-docker-compose -f docker-compose.sso-test.yml down
 ```
 
 **Expected Result**:
@@ -365,9 +360,9 @@ docker-compose -f docker-compose.sso-test.yml down
 
 # Authenticate
 result = login_sso(
-    url="https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com",
-    username="PID9A15",
-    password="your_password"
+    url="https://example.com",
+    username="YOUR_USERNAME",
+    password="YOUR_PASSWORD"
 )
 
 # Show cookies received from SSO
@@ -399,11 +394,11 @@ for i, cookie in enumerate(browser_cookies["cookies"], 1):
 # Navigate and check cookies sent to server
 browser_action(
     action="goto",
-    url="https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com"
+    url="https://example.com"
 )
 
 # Get cookies for specific URL
-url_cookies = get_cookies(url="https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com")
+url_cookies = get_cookies(url="https://example.com")
 print(f"\n=== Cookies sent to application: {url_cookies['count']} ===")
 ```
 
@@ -432,10 +427,10 @@ def run_test_with_cleanup():
         # Authenticate
         print("Authenticating...")
         result = login_sso(
-            url="https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com",
-            username="PID9A15",
-            password="your_password",
-            totp_secret="your_totp_secret"
+            url="https://example.com",
+            username="YOUR_USERNAME",
+            password="YOUR_PASSWORD",
+            totp_secret="YOUR_TOTP_SECRET"
         )
         
         if result["status"] != "success":
@@ -449,7 +444,7 @@ def run_test_with_cleanup():
         print("Testing access...")
         browser_action(
             action="goto",
-            url="https://appinspector-nonprod.offsec.mercedes-benz-techinnovation.com/dashboard"
+            url="https://example.com/dashboard"
         )
         
         # Verify access
