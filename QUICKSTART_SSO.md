@@ -6,7 +6,7 @@ Get started with SSO authentication in Strix in **3 minutes**.
 
 - Strix installed and working
 - Python 3.12+
-- Access to SSO MCP server (https://sso.mcp.offsec.corpintra.net/mcp)
+- Access to SSO MCP server (https://your-mcp-server.example.com/mcp)
 
 ## Installation
 
@@ -100,7 +100,7 @@ Application accessible!
 Edit `strix_extensions/tools/mcp_client.py`:
 
 ```python
-MCP_SERVER_URL = "https://sso.mcp.offsec.corpintra.net/mcp"
+MCP_SERVER_URL = "https://your-mcp-server.example.com/mcp"
 ```
 
 Or set environment variable:
@@ -143,7 +143,7 @@ pip install -r strix_extensions/requirements.txt
 **Solution**:
 - Verify network access to MCP server
 - Check if you need VPN
-- Test with: `curl https://sso.mcp.offsec.corpintra.net/mcp`
+- Test with: `curl https://your-mcp-server.example.com/mcp`
 
 ## Next Steps
 

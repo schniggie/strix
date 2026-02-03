@@ -184,7 +184,7 @@ clear_cookies()
 The MCP server URL is configured in `strix_extensions/tools/mcp_client.py`:
 
 ```python
-MCP_SERVER_URL = "https://sso.mcp.offsec.corpintra.net/mcp"
+MCP_SERVER_URL = "https://your-mcp-server.example.com/mcp"
 MCP_TIMEOUT = 30.0  # seconds
 ```
 
@@ -326,7 +326,7 @@ browser_action(action="goto", url="https://example.com")
 
 **Solution**: 
 - Verify MCP_SERVER_URL is correct
-- Check network connectivity: `curl https://sso.mcp.offsec.corpintra.net/mcp`
+- Check network connectivity: `curl https://your-mcp-server.example.com/mcp`
 - Ensure you're on the correct network (VPN, etc.)
 
 ### "No valid cookies provided"

@@ -4,7 +4,7 @@ This document provides practical examples of using the Strix SSO extension for c
 
 ## Example 1: Basic SSO Authentication
 
-**Scenario**: Authenticate to a Mercedes-Benz SSO-protected application
+**Scenario**: Authenticate to a SSO-protected application
 
 ```python
 # Agent prompt: "Authenticate to AppInspector and take a screenshot"
@@ -202,8 +202,8 @@ set_cookies(result["cookies"])
 # Access multiple applications with same SSO
 apps = [
     "https://example.com",
-    "https://testportal-nonprod.offsec.mercedes-benz-techinnovation.com",
-    "https://dashboard-nonprod.offsec.mercedes-benz-techinnovation.com"
+    "https://testportal.example.com",
+    "https://dashboard.example.com"
 ]
 
 for app_url in apps:
