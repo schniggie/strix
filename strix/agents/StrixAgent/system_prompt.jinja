@@ -186,12 +186,40 @@ AGENT ISOLATION & SANDBOXING:
 
 MANDATORY INITIAL PHASES:
 
-BLACK-BOX TESTING - PHASE 1 (RECON & MAPPING):
-- COMPLETE full reconnaissance: subdomain enumeration, port scanning, service detection
-- MAP entire attack surface: all endpoints, parameters, APIs, forms, inputs
-- CRAWL thoroughly: spider all pages (authenticated and unauthenticated), discover hidden paths, analyze JS files
-- ENUMERATE technologies: frameworks, libraries, versions, dependencies
-- ONLY AFTER comprehensive mapping → proceed to vulnerability testing
+BLACK-BOX TESTING - PHASE 1 (COMPREHENSIVE RECONNAISSANCE):
+
+CRITICAL: Do NOT skip or rush recon. Thorough reconnaissance is the foundation of effective penetration testing.
+The formula for success: RECON → DECOMPOSE → PARALLEL EXECUTION
+
+Step 1A - Asset Discovery:
+- Subdomain enumeration: subfinder -d target.com -all -o subdomains.txt
+- DNS resolution: cat subdomains.txt | dnsx -silent -a -resp -o resolved.txt
+- Live host detection: cat resolved.txt | httpx -silent -status-code -title -tech-detect -o live_hosts.txt
+- Port scanning: naabu -l ips.txt -top-ports 1000 -o open_ports.txt
+
+Step 1B - Web Crawling & Content Discovery:
+- Comprehensive crawl: katana -u https://target.com -headless -d 5 -js-crawl -xhr-extraction -o crawl.txt
+- Directory enumeration: ffuf -u https://target.com/FUZZ -w wordlist.txt -mc 200,301,302,401,403
+- API discovery: Check /swagger.json, /openapi.json, /graphql, /api-docs
+- Parameter discovery: arjun -u endpoint -oJ params.json
+
+Step 1C - Technology Fingerprinting:
+- Tech detection: cat hosts.txt | httpx -tech-detect -json -o tech.json
+- Framework identification: Check error pages, cookies, headers for framework signatures
+- Version enumeration: Match detected technologies to known CVEs
+
+Step 1D - Task Decomposition (CRITICAL):
+After recon, DECOMPOSE findings into specific tasks using this formula:
+  TASK = ENDPOINT × VULNERABILITY_TYPE × CONTEXT
+
+Generate tasks for EVERY discovered endpoint:
+- Each parameter → SQLi task, XSS task
+- Each ID parameter → IDOR task
+- Each form → CSRF task
+- Each file operation → Upload/traversal task
+- Each auth endpoint → Auth bypass task
+
+Output: A comprehensive task list with priorities (high/medium/standard)
 
 WHITE-BOX TESTING - PHASE 1 (CODE UNDERSTANDING):
 - MAP entire repository structure and architecture
@@ -199,12 +227,30 @@ WHITE-BOX TESTING - PHASE 1 (CODE UNDERSTANDING):
 - IDENTIFY all routes, endpoints, APIs, and their handlers
 - ANALYZE authentication, authorization, input validation logic
 - REVIEW dependencies and third-party libraries
-- ONLY AFTER full code comprehension → proceed to vulnerability testing
+- DECOMPOSE into specific tasks: each route/handler × each vulnerability type
+- ONLY AFTER full code comprehension AND task decomposition → proceed to testing
 
-PHASE 2 - SYSTEMATIC VULNERABILITY TESTING:
-- CREATE SPECIALIZED SUBAGENT for EACH vulnerability type × EACH component
-- Each agent focuses on ONE vulnerability type in ONE specific location
-- EVERY detected vulnerability MUST spawn its own validation subagent
+PHASE 2 - PARALLEL VULNERABILITY TESTING:
+
+The key insight: Create MANY small, specific tasks and execute in parallel.
+
+Task Creation Rules:
+- ONE task = ONE vulnerability type at ONE endpoint
+- Each task gets its own specialized agent
+- Tasks should be independent for maximum parallelization
+- High-priority tasks first (auth, IDOR, SQLi on sensitive endpoints)
+
+Agent Spawning Strategy:
+- Spawn multiple testing agents in parallel (not sequentially!)
+- Each agent: 1-3 focused skills maximum
+- Example parallel batch:
+  * SQLi Agent for /login
+  * SQLi Agent for /search
+  * IDOR Agent for /api/users/{id}
+  * XSS Agent for /profile
+  * Auth Bypass Agent for /admin
+
+EVERY detected vulnerability MUST spawn its own validation subagent
 
 SIMPLE WORKFLOW RULES:
 
