@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tools>
+  <tool name="set_cookies">
+    <description>
+      Inject authentication cookies into the browser context. This is essential for 
+      SSO authentication workflows where cookies are obtained from an external 
+      authentication mechanism (like MCP login_sso) and need to be injected into 
+      the browser session.
+
+      Cookies set with this tool will persist across all browser actions until:
+      - Explicitly cleared with clear_cookies()
+      - The browser is closed
+      - The cookies expire naturally
+    </description>
+    
+    <parameters>
+      <parameter name="cookies">
+        <type>list[dict]</type>
+        <required>true</required>
+        <description>
+          List of cookie dictionaries to inject. Each cookie must contain:
+          
+          Required fields:
+          - name: Cookie name (string)
+          - value: Cookie value (string)
+          - domain: Cookie domain (string, e.g., "example.com")
+          
+          Optional fields:
+          - path: Cookie path (string, default: "/")
+          - expires: Expiration time (Unix timestamp as float)
+          - httpOnly: HttpOnly flag (boolean)
+          - secure: Secure flag (boolean)
+          - sameSite: SameSite policy ("Strict", "Lax", or "None")
+        </description>
+      </parameter>
+      
+      <parameter name="tab_id">
+        <type>string | None</type>
+        <required>false</required>
+        <description>Optional tab ID (currently unused, for future compatibility)</description>
+      </parameter>
+    </parameters>
+    
+    <returns>
+      Dictionary with:
+      - status: "success" or "error"
+      - message: Human-readable status message
+      - cookies_set: Number of cookies successfully set
+    </returns>
+    
+    <examples>
+      <example>
+        <description>Set SSO authentication cookies received from MCP server</description>
+        <code>
+set_cookies([
+    {
+        "name": "OAuth_Token_Request_State",
+        "value": "c2ba1675-2ad1-4d16-9193-15457f069fb6",
+        "domain": "appinspector.example.com",
+        "path": "/"
+    },
+    {
+        "name": "session_id",
+        "value": "abc123xyz789",
+        "domain": "appinspector.example.com",
+        "path": "/",
+        "secure": true,
+        "httpOnly": true
+    }
+])
+        </code>
+      </example>
+    </examples>
+    
+    <important_usage_rules>
+      1. PREREQUISITE: Browser must be launched first
+         - Call browser_action(action="launch") before using this tool
+         - Or navigate to any URL to auto-launch the browser
+      
+      2. TYPICAL WORKFLOW for SSO authentication:
+         a. Call call_mcp_tool() to authenticate and get cookies
+         b. Extract cookies from the MCP response
+         c. Call set_cookies() with the cookies
+         d. Navigate to protected application with browser_action(action="goto")
+      
+      3. COOKIE PERSISTENCE:
+         - Cookies persist across all subsequent browser actions
+         - Use get_cookies() to verify cookies were set correctly
+         - Use clear_cookies() to remove all cookies if needed
+      
+      4. ERROR HANDLING:
+         - Tool validates all cookies before setting
+         - Invalid cookies are logged and skipped
+         - At least one valid cookie must be provided
+      
+      5. SECURITY CONSIDERATIONS:
+         - Cookies are stored in the browser context only
+         - Not persisted to disk by default
+         - Each agent gets isolated browser instance
+    </important_usage_rules>
+    
+    <common_errors>
+      <error>
+        <message>"No browser instance available"</message>
+        <solution>Launch browser first with browser_action(action="launch")</solution>
+      </error>
+      <error>
+        <message>"Browser context not initialized"</message>
+        <solution>Navigate to a URL first to initialize context</solution>
+      </error>
+      <error>
+        <message>"No valid cookies provided"</message>
+        <solution>Ensure cookies have required fields: name, value, domain</solution>
+      </error>
+    </common_errors>
+  </tool>
+
+  <tool name="get_cookies">
+    <description>
+      Retrieve cookies from the browser context. Useful for debugging authentication
+      issues, verifying SSO login state, or extracting session tokens.
+    </description>
+    
+    <parameters>
+      <parameter name="url">
+        <type>string | None</type>
+        <required>false</required>
+        <description>
+          Optional URL to filter cookies by domain. If provided, only returns 
+          cookies that would be sent with requests to this URL.
+        </description>
+      </parameter>
+      
+      <parameter name="tab_id">
+        <type>string | None</type>
+        <required>false</required>
+        <description>Optional tab ID (currently unused)</description>
+      </parameter>
+    </parameters>
+    
+    <returns>
+      Dictionary with:
+      - status: "success" or "error"
+      - cookies: List of cookie dictionaries
+      - count: Number of cookies retrieved
+    </returns>
+    
+    <examples>
+      <example>
+        <description>Get all cookies from browser</description>
+        <code>get_cookies()</code>
+      </example>
+      
+      <example>
+        <description>Get cookies for specific domain</description>
+        <code>get_cookies(url="https://example.com")</code>
+      </example>
+    </examples>
+    
+    <important_usage_rules>
+      1. Browser must be running and initialized
+      2. Returns all cookies if no URL filter provided
+      3. Useful for verifying set_cookies() worked correctly
+      4. Use after SSO login to confirm authentication state
+    </important_usage_rules>
+  </tool>
+
+  <tool name="clear_cookies">
+    <description>
+      Clear all cookies from the browser context. Use this to reset authentication
+      state or start fresh sessions.
+    </description>
+    
+    <parameters>
+      <parameter name="tab_id">
+        <type>string | None</type>
+        <required>false</required>
+        <description>Optional tab ID (currently unused)</description>
+      </parameter>
+    </parameters>
+    
+    <returns>
+      Dictionary with:
+      - status: "success" or "error"
+      - message: Human-readable status message
+    </returns>
+    
+    <examples>
+      <example>
+        <description>Clear all browser cookies</description>
+        <code>clear_cookies()</code>
+      </example>
+    </examples>
+    
+    <important_usage_rules>
+      1. Removes ALL cookies from browser context
+      2. Cannot be undone - cookies are permanently deleted
+      3. Use before testing different authentication scenarios
+      4. Browser must be running
+    </important_usage_rules>
+  </tool>
+</tools>
+

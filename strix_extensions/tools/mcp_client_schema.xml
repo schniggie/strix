@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tools>
+  <tool name="call_mcp_tool">
+    <description>
+      Call a tool on an external MCP (Model Context Protocol) server.
+      
+      This tool enables Strix agents to interact with external services via MCP,
+      extending capabilities beyond built-in tools. The MCP server is configured
+      to provide specialized functionality like SSO authentication, external API
+      integrations, or custom security tools.
+      
+      Current MCP server: Configured via MCP_SERVER_URL environment variable
+    </description>
+    
+    <parameters>
+      <parameter name="tool_name">
+        <type>string</type>
+        <required>true</required>
+        <description>
+          Name of the tool to call on the MCP server.
+          
+          Available tools:
+          - "login_sso": Authenticate to SSO-protected applications
+          
+          (Use this tool to discover other available MCP tools)
+        </description>
+      </parameter>
+      
+      <parameter name="arguments">
+        <type>dict</type>
+        <required>true</required>
+        <description>
+          Dictionary of arguments to pass to the MCP tool. The required arguments
+          depend on which tool is being called. Refer to the specific tool's
+          documentation for argument requirements.
+          
+          Example for login_sso:
+          {
+            "url": "https://app.example.com",
+            "username": "user@example.com",
+            "password": "secret",
+            "totp_secret": "YOUR_TOTP_SECRET"
+          }
+        </description>
+      </parameter>
+      
+      <parameter name="progress_token">
+        <type>int | None</type>
+        <required>false</required>
+        <description>
+          Optional progress token for tracking long-running operations.
+        </description>
+      </parameter>
+    </parameters>
+    
+    <returns>
+      Dictionary with:
+      - status: "success" or "error"
+      - content: List of content items from MCP response
+        Each content item may be:
+        - {"type": "text", "text": "..."}
+        - {"type": "json", "data": {...}}
+        - {"type": "image", "data": "...", "mimeType": "..."}
+      - message: Error message if status is "error"
+      - _raw_response: Complete raw MCP response (for debugging)
+    </returns>
+    
+    <examples>
+      <example>
+        <description>Call SSO login tool</description>
+        <code>
+call_mcp_tool(
+    tool_name="login_sso",
+    arguments={
+        "url": "https://app.example.com",
+        "username": "YOUR_USERNAME",
+        "password": "YOUR_PASSWORD",
+        "totp_secret": "YOUR_TOTP_SECRET"
+    }
+)
+        </code>
+      </example>
+    </examples>
+    
+    <important_usage_rules>
+      1. LOW-LEVEL TOOL: This is a generic MCP client
+         - For SSO authentication, prefer the login_sso() convenience tool
+         - Use this for calling other MCP tools or custom workflows
+      
+      2. RESPONSE PARSING:
+         - Check status field first
+         - Content is a list of items with different types
+         - JSON data is automatically parsed when detected
+      
+      3. ERROR HANDLING:
+         - Network errors return status="error" with message
+         - MCP tool errors also return status="error"
+         - Check _raw_response for debugging complex issues
+      
+      4. TIMEOUT:
+         - Default timeout is 30 seconds
+         - Long-running operations may time out
+         - Progress tokens can help track long operations
+    </important_usage_rules>
+  </tool>
+
+  <tool name="login_sso">
+    <description>
+      Authenticate to an SSO-protected application and retrieve authentication cookies.
+      
+      This is a high-level convenience tool that:
+      1. Calls the MCP server's login_sso tool
+      2. Extracts and validates authentication cookies
+      3. Returns cookies ready for injection with set_cookies()
+      
+      TYPICAL SSO AUTHENTICATION WORKFLOW:
+      1. Call login_sso() to authenticate and get cookies
+      2. Call set_cookies() to inject cookies into browser
+      3. Navigate to the protected application with browser_action()
+      4. Application should now be accessible with SSO session
+    </description>
+    
+    <parameters>
+      <parameter name="url">
+        <type>string</type>
+        <required>true</required>
+        <description>
+          Target application URL to authenticate to.
+          Example: "https://app.example.com"
+        </description>
+      </parameter>
+      
+      <parameter name="username">
+        <type>string</type>
+        <required>true</required>
+        <description>
+          SSO username for authentication
+        </description>
+      </parameter>
+      
+      <parameter name="password">
+        <type>string</type>
+        <required>true</required>
+        <description>
+          SSO password for the user account
+        </description>
+      </parameter>
+      
+      <parameter name="totp_secret">
+        <type>string | None</type>
+        <required>false</required>
+        <description>
+          Optional TOTP secret for two-factor authentication.
+          Format: Base32-encoded TOTP secret (usually space-separated groups of 4 characters)
+          Example: "YOUR_TOTP_SECRET"
+        </description>
+      </parameter>
+      
+      <parameter name="totp_secret_int">
+        <type>string | None</type>
+        <required>false</required>
+        <description>
+          Optional alternative TOTP secret format (rarely used)
+        </description>
+      </parameter>
+    </parameters>
+    
+    <returns>
+      Dictionary with:
+      - status: "success" or "error"
+      - cookies: List of cookie dictionaries (ready for set_cookies())
+        Each cookie has: name, value, domain, path
+      - final_url: Final URL after authentication redirect
+      - login_done: Boolean indicating if login completed
+      - message: Human-readable status message
+    </returns>
+    
+    <examples>
+      <example>
+        <description>Complete SSO authentication workflow</description>
+        <code>
+# Step 1: Authenticate and get cookies
+result = login_sso(
+    url="https://app.example.com",
+    username="YOUR_USERNAME",
+    password="YOUR_PASSWORD",
+    totp_secret="YOUR_TOTP_SECRET"
+)
+
+# Step 2: Check if login succeeded
+if result["status"] == "success":
+    # Step 3: Inject cookies into browser
+    set_cookies(result["cookies"])
+    
+    # Step 4: Navigate to protected application
+    browser_action(action="goto", url=result["final_url"])
+    
+    # Application should now be accessible!
+else:
+    # Handle authentication failure
+    print(f"Login failed: {result['message']}")
+        </code>
+      </example>
+      
+      <example>
+        <description>SSO login without 2FA</description>
+        <code>
+result = login_sso(
+    url="https://app.example.com",
+    username="user@example.com",
+    password="secret123"
+)
+
+if result["status"] == "success":
+    set_cookies(result["cookies"])
+    browser_action(action="goto", url="https://app.example.com")
+        </code>
+      </example>
+    </examples>
+    
+    <important_usage_rules>
+      1. PREFERRED SSO TOOL: Use this instead of call_mcp_tool for SSO auth
+         - Handles response parsing automatically
+         - Validates login success
+         - Returns cookies in correct format for set_cookies()
+      
+      2. ALWAYS CHECK STATUS:
+         - Verify result["status"] == "success" before using cookies
+         - Check result["login_done"] for additional confirmation
+         - Display result["message"] to understand failures
+      
+      3. COOKIE INJECTION:
+         - Immediately call set_cookies() after successful login
+         - Cookies are only valid for a limited time
+         - Use the final_url for navigation (handles redirects)
+      
+      4. BROWSER PREREQUISITES:
+         - Browser must be launched before calling set_cookies()
+         - Can call browser_action(action="launch") first
+         - Or just navigate directly (auto-launches browser)
+      
+      5. SECURITY BEST PRACTICES:
+         - Never log or display passwords/TOTP secrets
+         - Cookies are session-specific (not persisted to disk)
+         - Clear cookies with clear_cookies() when done
+      
+      6. TYPICAL ERRORS:
+         - "MCP server unreachable": Network connectivity issue
+         - "Login did not complete": Invalid credentials or 2FA required
+         - "No cookies returned": Authentication succeeded but no session
+    </important_usage_rules>
+    
+    <common_workflow_patterns>
+      <pattern>
+        <name>Simple SSO Authentication</name>
+        <steps>
+          1. login_sso(url, username, password, totp_secret)
+          2. set_cookies(result["cookies"])
+          3. browser_action(action="goto", url=target_url)
+        </steps>
+      </pattern>
+      
+      <pattern>
+        <name>Multi-Application SSO</name>
+        <steps>
+          1. login_sso() once for SSO domain
+          2. set_cookies() to inject session
+          3. Navigate to multiple apps in same SSO domain
+          4. Cookies work across all apps
+        </steps>
+      </pattern>
+      
+      <pattern>
+        <name>Session Refresh</name>
+        <steps>
+          1. Try accessing protected resource
+          2. If 401/403 error, call clear_cookies()
+          3. Call login_sso() again
+          4. set_cookies() with new session
+          5. Retry access
+        </steps>
+      </pattern>
+    </common_workflow_patterns>
+  </tool>
+</tools>
